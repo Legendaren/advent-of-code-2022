@@ -22,7 +22,7 @@ def tree_iterator(grid, start_pos, step):
 
 
 def interior_trees(grid):
-    return [(r, c) for r in range(1, len(grid) - 1) for c in range(1, len(grid[r]) - 1)]
+    return ((r, c) for r in range(1, len(grid) - 1) for c in range(1, len(grid[r]) - 1))
 
 
 def is_visible_from_outside_grid(grid, pos):
