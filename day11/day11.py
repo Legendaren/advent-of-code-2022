@@ -24,7 +24,6 @@ class Monkey:
         return self.if_true_monkey if is_divisible else self.if_false_monkey
 
     def popleft(self):
-        self.inspected_items_count += 1
         return self.items.popleft()
 
     def append(self, item):
@@ -36,13 +35,11 @@ def parse_operation(op_str):
     if operator == '+':
         if operand2 == 'old':
             return lambda old: old + old
-        else:
-            return lambda old: old + int(operand2)
+        return lambda old: old + int(operand2)
     elif operator == '*':
         if operand2 == 'old':
             return lambda old: old * old
-        else:
-            return lambda old: old * int(operand2)
+        return lambda old: old * int(operand2)
     return None
 
 
@@ -71,35 +68,39 @@ def read_input():
     return monkeys
 
 
+def perform_round(monkeys, divide_worry_level_by_three):
+    least_common_divisor = math.lcm(*(m.divisor for m in monkeys))
+    for monkey in monkeys:
+        while monkey.items:
+            worry_level = monkey.popleft()
+            monkey.inspected_items_count += 1
+
+            new_worry_level = monkey.operator_func(worry_level)
+            new_worry_level %= least_common_divisor
+            if divide_worry_level_by_three:
+                new_worry_level //= 3
+
+            is_divisible = new_worry_level % monkey.divisor == 0
+            monkeys[monkey.throw_to(is_divisible)].append(new_worry_level)
+
+
+def monkey_business(monkeys):
+    count1, count2 = sorted(m.inspected_items_count for m in monkeys)[-2:]
+    return count1 * count2
+
+
 def solve_part1():
     monkeys = read_input()
-    for round in range(20):
-        for monkey in monkeys:
-            while monkey.items:
-                worry_level = monkey.popleft()
-                new_worry_level = monkey.operator_func(worry_level)
-                new_worry_level //= 3
-                is_divisible = new_worry_level % monkey.divisor == 0
-                monkeys[monkey.throw_to(is_divisible)].append(new_worry_level)
-    sorted_by_inspection_counts = sorted(m.inspected_items_count for m in monkeys)
-    count1, count2 = sorted_by_inspection_counts[-2:]
-    return count1 * count2
+    for r in range(20):
+        perform_round(monkeys, divide_worry_level_by_three=True)
+    return monkey_business(monkeys)
 
 
 def solve_part2():
     monkeys = read_input()
-    least_common_divisor = math.lcm(*(m.divisor for m in monkeys))
-    for round in range(10000):
-        for monkey in monkeys:
-            while monkey.items:
-                worry_level = monkey.popleft()
-                new_worry_level = monkey.operator_func(worry_level)
-                new_worry_level %= least_common_divisor
-                is_divisible = new_worry_level % monkey.divisor == 0
-                monkeys[monkey.throw_to(is_divisible)].append(new_worry_level)
-    sorted_by_inspection_counts = sorted(m.inspected_items_count for m in monkeys)
-    count1, count2 = sorted_by_inspection_counts[-2:]
-    return count1 * count2
+    for r in range(10000):
+        perform_round(monkeys, divide_worry_level_by_three=False)
+    return monkey_business(monkeys)
 
 
 print(f"Part 1 answer: {solve_part1()}")
