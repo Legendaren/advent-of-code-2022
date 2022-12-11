@@ -1,5 +1,6 @@
 from pathlib import Path
 from collections import deque
+import math
 import re
 
 
@@ -8,12 +9,16 @@ class Monkey:
                  n,
                  starting_items,
                  operator_func,
-                 test_func):
+                 divisor,
+                 true_monkey,
+                 false_monkey):
         self.n = n
         self.items = starting_items
         self.operator_func = operator_func
-        self.test_func = test_func
+        self.divisor = divisor
         self.inspected_items_count = 0
+        self.true_monkey = true_monkey
+        self.false_monkey = false_monkey
 
     def popleft(self):
         self.inspected_items_count += 1
@@ -58,12 +63,10 @@ def read_input():
             n = int(monkey_pattern.findall(line[0])[0])
             starting_items = deque(int(item) for item in starting_items_pattern.findall(line[1]))
             operator_func = parse_operation(operation_pattern.findall(line[2])[0])
-            test_func = parse_test(
-                test_pattern.findall(line[3])[0],
-                if_true_pattern.findall(line[4])[0],
-                if_false_pattern.findall(line[5])[0]
-            )
-            monkeys.append(Monkey(n, starting_items, operator_func, test_func))
+            divisor = int(test_pattern.findall(line[3])[0])
+            true_monkey = int(if_true_pattern.findall(line[4])[0])
+            false_monkey = int(if_false_pattern.findall(line[5])[0])
+            monkeys.append(Monkey(n, starting_items, operator_func, divisor, true_monkey, false_monkey))
         return monkeys
 
 
@@ -82,4 +85,24 @@ def solve_part1():
     return count1 * count2
 
 
-print(f"Part 1 answer: {solve_part1()}")
+def solve_part2():
+    monkeys = read_input()
+    least_common_divisor = math.lcm(*(m.divisor for m in monkeys))
+    for round in range(10000):
+        for monkey in monkeys:
+            while monkey.items:
+                worry_level = monkey.popleft()
+                new_worry_level = monkey.operator_func(worry_level)
+                new_worry_level %= least_common_divisor
+                if new_worry_level % monkey.divisor == 0:
+                    monkeys[monkey.true_monkey].append(new_worry_level)
+                else:
+                    monkeys[monkey.false_monkey].append(new_worry_level)
+    sorted_by_inspection_counts = sorted(monkeys, key=lambda item: item.inspected_items_count)
+    count1, count2 = [monkey.inspected_items_count for monkey in sorted_by_inspection_counts[-2:]]
+    #return [m.inspected_items_count for m in monkeys]
+    return count1 * count2
+
+
+#print(f"Part 1 answer: {solve_part1()}")
+print(f"Part 2 answer: {solve_part2()}")
