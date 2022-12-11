@@ -69,14 +69,14 @@ def read_input():
 
 
 def perform_round(monkeys, divide_worry_level_by_three):
-    least_common_divisor = math.lcm(*(m.divisor for m in monkeys))
+    least_common_denominator = math.lcm(*(m.divisor for m in monkeys))
     for monkey in monkeys:
         while monkey.items:
             worry_level = monkey.popleft()
             monkey.inspected_items_count += 1
 
             new_worry_level = monkey.operator_func(worry_level)
-            new_worry_level %= least_common_divisor
+            new_worry_level %= least_common_denominator
             if divide_worry_level_by_three:
                 new_worry_level //= 3
 
