@@ -16,6 +16,15 @@ def char_pos(grid, char):
     return grid.index(x), x.index(char)
 
 
+def all_char_pos(grid, char_to_find):
+    positions = []
+    for r, row in enumerate(grid):
+        for c, char in enumerate(row):
+            if char == char_to_find:
+                positions.append((r, c))
+    return positions
+
+
 def neighbor_pos(g, row, col):
     up = (row - 1, col)
     right = (row, col + 1)
@@ -45,11 +54,18 @@ def read_input():
         return [line.rstrip() for line in f.readlines()]
 
 
-def solve_part1():
-    grid = read_input()
-    graph = generate_graph(grid)
+def solve_part1(grid, graph):
     shortest_path = nx.shortest_path(graph, source=char_pos(grid, 'S'), target=char_pos(grid, 'E'))
     return len(shortest_path) - 1
 
 
-print(f"Part 1 answer: {solve_part1()}")
+def solve_part2(grid, graph):
+    shortest_paths = nx.shortest_path(graph, target=char_pos(grid, 'E'))
+    path_lengths_from_a = [len(shortest_paths[path]) for path in shortest_paths if grid[path[0]][path[1]] == 'a']
+    return min(path_lengths_from_a) - 1
+
+
+input_grid = read_input()
+generated_graph = generate_graph(input_grid)
+print(f"Part 1 answer: {solve_part1(input_grid, generated_graph)}")
+print(f"Part 2 answer: {solve_part2(input_grid, generated_graph)}")
