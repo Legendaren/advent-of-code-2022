@@ -1,5 +1,6 @@
 from pathlib import Path
 from itertools import zip_longest
+from functools import cmp_to_key
 
 
 def read_input():
@@ -50,5 +51,17 @@ def solve_part1(pairs):
     return sum(indices)
 
 
+def solve_part2(pairs):
+    div_pkg1 = [[2]]
+    div_pkg2 = [[6]]
+    extended_pairs = pairs + [(div_pkg1, div_pkg2)]
+    flattened_pairs = list(sum(extended_pairs, ()))
+    sorted_pairs = sorted(flattened_pairs, key=cmp_to_key(in_order), reverse=True)
+    div_pkg1_index = sorted_pairs.index(div_pkg1) + 1
+    div_pkg2_index = sorted_pairs.index(div_pkg2) + 1
+    return div_pkg1_index * div_pkg2_index
+
+
 input_pairs = read_input()
 print(f"Part 1 answer: {solve_part1(input_pairs)}")
+print(f"Part 2 answer: {solve_part2(input_pairs)}")
